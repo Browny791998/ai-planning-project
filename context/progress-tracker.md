@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 01 — Design System ✓
+- Feature 02 — Editor Chrome ✓
 
 ## Current Goal
 
@@ -17,6 +17,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - `lib/utils.ts` with `cn()` (clsx + tailwind-merge)
 - `components/ui/`: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea
 - `globals.css`: dark-only theme — all shadcn semantic vars + Ghost AI custom tokens wired via `@theme inline`
+- `components/editor/editor-navbar.tsx`: fixed top navbar, sidebar toggle with PanelLeftOpen/PanelLeftClose, left/center/right sections
+- `components/editor/project-sidebar.tsx`: floating overlay sidebar, slides in from left, Projects header + close button, My Projects / Shared tabs (empty state), full-width New Project button
 
 ## In Progress
 
@@ -24,7 +26,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 02 (TBD from feature-specs)
+- Feature 03 (TBD from feature-specs)
 
 ## Open Questions
 
