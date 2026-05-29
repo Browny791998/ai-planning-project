@@ -18,7 +18,7 @@ export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
     >
       <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
         <span className="text-sm font-medium text-copy-primary">Projects</span>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" aria-label="Close">
           <X className="h-4 w-4 text-copy-secondary" />
         </Button>
       </div>
