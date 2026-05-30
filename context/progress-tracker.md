@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 03 — Auth ✓
+- Feature 04 — Project Dialogs & Editor Home ✓
 
 ## Current Goal
 
@@ -18,16 +18,20 @@ Update this file whenever the current phase, active feature, or implementation s
 - `components/ui/`: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea
 - `globals.css`: dark-only theme — all shadcn semantic vars + Ghost AI custom tokens wired via `@theme inline`
 - `components/editor/editor-navbar.tsx`: fixed top navbar, sidebar toggle with PanelLeftOpen/PanelLeftClose, left/center/right sections
-- `components/editor/project-sidebar.tsx`: floating overlay sidebar, slides in from left, Projects header + close button, My Projects / Shared tabs (empty state), full-width New Project button
 - Auth (Feature 03):
   - `@clerk/ui` installed (v1.14.0)
   - `proxy.ts` at project root — protected-first `clerkMiddleware`, public routes driven by `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL` env vars
-  - `app/layout.tsx` — `ClerkProvider` wraps root layout with `ui` from `@clerk/ui`, dark `theme` from `@clerk/ui/themes`, CSS variable overrides via `appearance.variables`
-  - `app/page.tsx` — server component redirects authenticated users to `/editor`, unauthenticated to `/sign-in` (middleware also enforces protection)
-  - `app/editor/page.tsx` — editor shell moved here; protected by middleware
-  - `app/sign-in/[[...sign-in]]/page.tsx` — two-panel layout (left: logo + tagline + feature list; right: Clerk `<SignIn />`); left panel hidden on small screens
-  - `app/sign-up/[[...sign-up]]/page.tsx` — same two-panel layout with Clerk `<SignUp />`
+  - `app/layout.tsx` — `ClerkProvider` wraps root layout with `ui` from `@clerk/ui`, dark `theme` from `@clerk/ui/themes`, CSS variable overrides via `appearance.variables` and `appearance.elements`
+  - `app/page.tsx` — server component redirects authenticated users to `/editor`, unauthenticated to `/sign-in`
+  - `app/sign-in/[[...sign-in]]/page.tsx` and `app/sign-up/[[...sign-up]]/page.tsx` — 50/50 two-panel layout; left panel hidden on mobile
   - `components/editor/editor-navbar.tsx` — `UserButton` added to right section
+- Project Dialogs & Editor Home (Feature 04):
+  - `hooks/use-project-dialogs.ts` — `useProjectDialogs` hook (dialog/form/loading state, slug derivation); `ProjectDialogsContext` + `useEditorDialogs` for consuming context; `MOCK_MY_PROJECTS` / `MOCK_SHARED_PROJECTS`
+  - `components/editor/project-dialogs.tsx` — Create (name input + live slug preview), Rename (prefilled input, Enter submits), Delete (destructive confirm) dialogs
+  - `components/editor/editor-home.tsx` — home screen: heading, description, New Project button wired to Create dialog via context
+  - `components/editor/project-sidebar.tsx` — mock project list in My Projects/Shared tabs; hover actions (Pencil/Trash) on owned projects only; New Project button opens Create dialog; mobile backdrop scrim closes sidebar on tap
+  - `components/editor/editor-shell.tsx` — provides `ProjectDialogsContext`, calls `useProjectDialogs`, renders `ProjectDialogs` alongside shell
+  - `app/editor/page.tsx` — renders `<EditorShell><EditorHome /></EditorShell>`
 
 ## In Progress
 
@@ -35,7 +39,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 04 (TBD from feature-specs)
+- Feature 05 (TBD from feature-specs)
 
 ## Open Questions
 
@@ -50,6 +54,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Clerk middleware lives in `proxy.ts` (Next.js 16 convention), not `middleware.ts`
 - `@clerk/ui` bundled UI (not CDN) — `ui` prop on `ClerkProvider` enables `@clerk/ui/themes` and typed appearance using `theme` key (not legacy `baseTheme`)
 - Clerk appearance overrides use `var(--css-token)` references — no hardcoded colors
+- Dialog/form state lives in `useProjectDialogs` hook; shared via `ProjectDialogsContext` provided by `EditorShell`; consumed by `ProjectSidebar` and `EditorHome` via `useEditorDialogs`
 
 ## Session Notes
 
