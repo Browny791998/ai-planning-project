@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 04 — Project Dialogs & Editor Home ✓
+- Feature 05 — Prisma Schema & Data Layer ✓
 
 ## Current Goal
 
@@ -25,6 +25,11 @@ Update this file whenever the current phase, active feature, or implementation s
   - `app/page.tsx` — server component redirects authenticated users to `/editor`, unauthenticated to `/sign-in`
   - `app/sign-in/[[...sign-in]]/page.tsx` and `app/sign-up/[[...sign-up]]/page.tsx` — 50/50 two-panel layout; left panel hidden on mobile
   - `components/editor/editor-navbar.tsx` — `UserButton` added to right section
+- Prisma Schema & Data Layer (Feature 05):
+  - `prisma/models/project.prisma` — `ProjectStatus` enum (`DRAFT`/`ARCHIVED`), `Project` model (ownerId, name, optional description, status, canvasJsonPath, timestamps, indexes on ownerId and createdAt), `ProjectCollaborator` model (projectId cascade, email, createdAt, unique on projectId/email, indexes on email and projectId/createdAt)
+  - `lib/prisma.ts` — cached singleton; branches on `DATABASE_URL`: `prisma+postgres://` → Accelerate via `@prisma/extension-accelerate`; otherwise direct `@prisma/adapter-pg`; `global.prismaGlobal` cache for dev hot-reload
+  - Migration `20260531021505_init_project_models` applied; client generated to `app/generated/prisma/`
+  - `@prisma/extension-accelerate` installed
 - Project Dialogs & Editor Home (Feature 04):
   - `hooks/use-project-dialogs.ts` — `useProjectDialogs` hook (dialog/form/loading state, slug derivation); `ProjectDialogsContext` + `useEditorDialogs` for consuming context; `MOCK_MY_PROJECTS` / `MOCK_SHARED_PROJECTS`
   - `components/editor/project-dialogs.tsx` — Create (name input + live slug preview), Rename (prefilled input, Enter submits), Delete (destructive confirm) dialogs
@@ -39,7 +44,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 05 (TBD from feature-specs)
+- Feature 06 (TBD from feature-specs)
 
 ## Open Questions
 
