@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 04 — Project Dialogs & Editor Home ✓
+- Feature 07 — Wire Editor Home ✓
 
 ## Current Goal
 
@@ -25,13 +25,25 @@ Update this file whenever the current phase, active feature, or implementation s
   - `app/page.tsx` — server component redirects authenticated users to `/editor`, unauthenticated to `/sign-in`
   - `app/sign-in/[[...sign-in]]/page.tsx` and `app/sign-up/[[...sign-up]]/page.tsx` — 50/50 two-panel layout; left panel hidden on mobile
   - `components/editor/editor-navbar.tsx` — `UserButton` added to right section
+- Prisma Schema & Data Layer (Feature 05):
+  - `prisma/models/project.prisma` — `ProjectStatus` enum (`DRAFT`/`ARCHIVED`), `Project` model (ownerId, name, optional description, status, canvasJsonPath, timestamps, indexes on ownerId and createdAt), `ProjectCollaborator` model (projectId cascade, email, createdAt, unique on projectId/email, indexes on email and projectId/createdAt)
+  - `lib/prisma.ts` — cached singleton; branches on `DATABASE_URL`: `prisma+postgres://` → Accelerate via `@prisma/extension-accelerate`; otherwise direct `@prisma/adapter-pg`; `global.prismaGlobal` cache for dev hot-reload
+  - Migration `20260531021505_init_project_models` applied; client generated to `app/generated/prisma/`
+  - `@prisma/extension-accelerate` installed
+  - `lib/prisma.ts` updated: always applies `$extends(withAccelerate())` so the exported `prisma` has a single consistent type (fixes union-type errors on query methods)
+- Project APIs (Feature 06):
+  - `app/api/projects/route.ts` — `GET` (list owner's projects) and `POST` (create project, defaults name to `Untitled Project`)
+  - `app/api/projects/[projectId]/route.ts` — `PATCH` (rename) and `DELETE` (hard delete); both enforce 401 for unauthenticated and 403 for non-owner
 - Project Dialogs & Editor Home (Feature 04):
-  - `hooks/use-project-dialogs.ts` — `useProjectDialogs` hook (dialog/form/loading state, slug derivation); `ProjectDialogsContext` + `useEditorDialogs` for consuming context; `MOCK_MY_PROJECTS` / `MOCK_SHARED_PROJECTS`
-  - `components/editor/project-dialogs.tsx` — Create (name input + live slug preview), Rename (prefilled input, Enter submits), Delete (destructive confirm) dialogs
+  - `hooks/use-project-dialogs.ts` — `ProjectDialogsContext` + `useEditorDialogs` consumer hook; `Project` and `DialogType` types
+  - `components/editor/project-dialogs.tsx` — Create (name input + live room ID preview), Rename (prefilled input, Enter submits), Delete (destructive confirm) dialogs; all wired to real confirm handlers
   - `components/editor/editor-home.tsx` — home screen: heading, description, New Project button wired to Create dialog via context
-  - `components/editor/project-sidebar.tsx` — mock project list in My Projects/Shared tabs; hover actions (Pencil/Trash) on owned projects only; New Project button opens Create dialog; mobile backdrop scrim closes sidebar on tap
-  - `components/editor/editor-shell.tsx` — provides `ProjectDialogsContext`, calls `useProjectDialogs`, renders `ProjectDialogs` alongside shell
-  - `app/editor/page.tsx` — renders `<EditorShell><EditorHome /></EditorShell>`
+  - `components/editor/project-sidebar.tsx` — real project data via props (My Projects/Shared tabs); hover actions (Pencil/Trash) on owned projects only; New Project button opens Create dialog; mobile backdrop scrim closes sidebar on tap
+  - `components/editor/editor-shell.tsx` — provides `ProjectDialogsContext`, calls `useProjectActions`, receives project data as props, renders `ProjectDialogs`
+  - `app/editor/page.tsx` — async server component; fetches owned + shared projects via `getProjectsForUser`, passes to `EditorShell`
+- Wire Editor Home (Feature 07):
+  - `lib/projects.ts` — `getProjectsForUser()`: fetches owned projects by userId and shared projects by email (two-step query for Accelerate compatibility)
+  - `hooks/use-project-actions.ts` — `useProjectActions` hook: dialog/form state, slug + short-suffix room ID derivation, `confirmCreate` (POST → navigate to workspace), `confirmRename` (PATCH → refresh), `confirmDelete` (DELETE → redirect if active else refresh)
 
 ## In Progress
 
@@ -39,7 +51,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 05 (TBD from feature-specs)
+- Feature 07 (TBD from feature-specs)
 
 ## Open Questions
 
