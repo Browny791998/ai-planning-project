@@ -4,25 +4,25 @@ import { useState } from "react";
 import { EditorNavbar } from "./editor-navbar";
 import { ProjectSidebar } from "./project-sidebar";
 import { ProjectDialogs } from "./project-dialogs";
-import {
-  useProjectDialogs,
-  ProjectDialogsContext,
-} from "@/hooks/use-project-dialogs";
+import { ProjectDialogsContext, type Project } from "@/hooks/use-project-dialogs";
+import { useProjectActions } from "@/hooks/use-project-actions";
 
 interface EditorShellProps {
   children: React.ReactNode;
+  myProjects: Project[];
+  sharedProjects: Project[];
 }
 
-export function EditorShell({ children }: EditorShellProps) {
+export function EditorShell({ children, myProjects, sharedProjects }: EditorShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const dialogs = useProjectDialogs();
+  const actions = useProjectActions();
 
   return (
     <ProjectDialogsContext.Provider
       value={{
-        openCreate: dialogs.openCreate,
-        openRename: dialogs.openRename,
-        openDelete: dialogs.openDelete,
+        openCreate: actions.openCreate,
+        openRename: actions.openRename,
+        openDelete: actions.openDelete,
       }}
     >
       <div className="h-screen overflow-hidden bg-base">
@@ -33,15 +33,20 @@ export function EditorShell({ children }: EditorShellProps) {
         <ProjectSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          myProjects={myProjects}
+          sharedProjects={sharedProjects}
         />
         <ProjectDialogs
-          dialog={dialogs.dialog}
-          selectedProject={dialogs.selectedProject}
-          name={dialogs.name}
-          slug={dialogs.slug}
-          isLoading={dialogs.isLoading}
-          onClose={dialogs.close}
-          onNameChange={dialogs.setName}
+          dialog={actions.dialog}
+          selectedProject={actions.selectedProject}
+          name={actions.name}
+          roomId={actions.roomId}
+          isLoading={actions.isLoading}
+          onClose={actions.close}
+          onNameChange={actions.setName}
+          onConfirmCreate={actions.confirmCreate}
+          onConfirmRename={actions.confirmRename}
+          onConfirmDelete={actions.confirmDelete}
         />
         <main className="h-full pt-12">{children}</main>
       </div>

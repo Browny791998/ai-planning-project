@@ -16,20 +16,26 @@ interface ProjectDialogsProps {
   dialog: DialogType;
   selectedProject: Project | null;
   name: string;
-  slug: string;
+  roomId: string;
   isLoading: boolean;
   onClose: () => void;
   onNameChange: (value: string) => void;
+  onConfirmCreate: () => Promise<void>;
+  onConfirmRename: () => Promise<void>;
+  onConfirmDelete: () => Promise<void>;
 }
 
 export function ProjectDialogs({
   dialog,
   selectedProject,
   name,
-  slug,
+  roomId,
   isLoading,
   onClose,
   onNameChange,
+  onConfirmCreate,
+  onConfirmRename,
+  onConfirmDelete,
 }: ProjectDialogsProps) {
   return (
     <>
@@ -54,12 +60,17 @@ export function ProjectDialogs({
                 placeholder="My project"
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && name.trim() && !isLoading) {
+                    onConfirmCreate();
+                  }
+                }}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-copy-muted">Slug</span>
+              <span className="text-xs text-copy-muted">Room ID</span>
               <span className="font-mono text-xs text-copy-faint">
-                {slug || "my-project"}
+                {roomId || "my-project-xxxxx"}
               </span>
             </div>
           </div>
@@ -68,8 +79,8 @@ export function ProjectDialogs({
             <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button disabled={!name.trim() || isLoading} onClick={onClose}>
-              Create
+            <Button disabled={!name.trim() || isLoading} onClick={onConfirmCreate}>
+              {isLoading ? "Creating…" : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -101,7 +112,7 @@ export function ProjectDialogs({
               onChange={(e) => onNameChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && name.trim() && !isLoading) {
-                  onClose();
+                  onConfirmRename();
                 }
               }}
             />
@@ -111,8 +122,8 @@ export function ProjectDialogs({
             <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button disabled={!name.trim() || isLoading} onClick={onClose}>
-              Save
+            <Button disabled={!name.trim() || isLoading} onClick={onConfirmRename}>
+              {isLoading ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -136,8 +147,8 @@ export function ProjectDialogs({
             <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button variant="destructive" disabled={isLoading} onClick={onClose}>
-              Delete
+            <Button variant="destructive" disabled={isLoading} onClick={onConfirmDelete}>
+              {isLoading ? "Deleting…" : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

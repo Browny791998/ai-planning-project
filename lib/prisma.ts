@@ -4,10 +4,10 @@ import { withAccelerate } from '@prisma/extension-accelerate'
 
 function createClient() {
   const url = process.env.DATABASE_URL ?? ''
-  if (url.startsWith('prisma+postgres://')) {
-    return new PrismaClient({ accelerateUrl: url }).$extends(withAccelerate())
-  }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) })
+  const base = url.startsWith('prisma+postgres://')
+    ? new PrismaClient({ accelerateUrl: url })
+    : new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) })
+  return base.$extends(withAccelerate())
 }
 
 type PrismaInstance = ReturnType<typeof createClient>
