@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 07 — Wire Editor Home ✓
+- Feature 12 — Shape Panel ✓
 
 ## Current Goal
 
@@ -44,6 +44,38 @@ Update this file whenever the current phase, active feature, or implementation s
 - Wire Editor Home (Feature 07):
   - `lib/projects.ts` — `getProjectsForUser()`: fetches owned projects by userId and shared projects by email (two-step query for Accelerate compatibility)
   - `hooks/use-project-actions.ts` — `useProjectActions` hook: dialog/form state, slug + short-suffix room ID derivation, `confirmCreate` (POST → navigate to workspace), `confirmRename` (PATCH → refresh), `confirmDelete` (DELETE → redirect if active else refresh)
+- Editor Workspace Shell (Feature 08):
+  - `lib/project-access.ts` — `getCurrentIdentity()` (userId + primary email via Clerk), `getProjectWithAccess()` (returns project if user is owner or collaborator, else null)
+  - `components/editor/access-denied.tsx` — centered lock icon, short message, link back to `/editor`
+  - `components/editor/editor-navbar.tsx` — updated with optional `projectName` (center), `onShare` (Share2 icon), `isAiSidebarOpen`/`onAiToggle` (Sparkles icon, brand color when active)
+  - `components/editor/project-sidebar.tsx` — added `activeProjectId` prop; active item highlighted with `bg-elevated` and `text-brand` font-medium
+  - `components/editor/workspace-shell.tsx` — client component: manages sidebar + AI sidebar state, provides `ProjectDialogsContext`, renders full-viewport layout (navbar with project name/share/AI toggle, project sidebar, canvas placeholder, AI sidebar placeholder)
+  - `app/editor/[roomId]/page.tsx` — async server component; unauthenticated → redirect `/sign-in`; no project or no access → `AccessDenied`; renders `WorkspaceShell` with project + sidebar data
+- Share Dialog (Feature 09):
+  - `app/api/projects/[projectId]/collaborators/route.ts` — `GET` (list collaborators, enriched with Clerk display name + avatar); `POST` (invite by email, owner-only)
+  - `app/api/projects/[projectId]/collaborators/[email]/route.ts` — `DELETE` (remove collaborator by email, owner-only)
+  - `components/editor/share-dialog.tsx` — client component: owner row (from `useUser`), collaborator list with Clerk-enriched avatars/names, invite form (owner only), remove buttons (owner only), copy-link button with 2s "Copied!" feedback
+  - `components/editor/workspace-shell.tsx` — added `isOwner` prop, `isShareOpen` state, `onShare` wired to open dialog, `<ShareDialog>` rendered
+  - `app/editor/[roomId]/page.tsx` — computes `isOwner = project.ownerId === identity.userId`, passes to `WorkspaceShell`
+
+- Base Canvas (Feature 11):
+  - `types/canvas.ts` — `CanvasNodeData` (label, color, shape), `CanvasNodeShape`, `CanvasNode`, `CanvasEdge` types, `NODE_COLORS` (8 pairs from ui-context), `NODE_SHAPES` (6 shapes)
+  - `liveblocks.config.ts` — `Storage` typed with `{ flow: LiveblocksFlow<CanvasNode, CanvasEdge> }`
+  - `components/editor/canvas-wrapper.tsx` — client wrapper: `LiveblocksProvider` + `RoomProvider` (with `initialStorage`) + `ErrorBoundary` + `ClientSideSuspense`; inner `CanvasFlow` uses `useLiveblocksFlow({ suspense: true })` wired to `ReactFlow` with dot-pattern `Background`, `MiniMap`, `ConnectionMode.Loose`, and `fitView`
+  - `components/editor/workspace-shell.tsx` — canvas placeholder replaced with `<CanvasWrapper roomId={projectId} />`
+  - `app/layout.tsx` — `@xyflow/react/dist/style.css` and `@liveblocks/react-flow/styles.css` imported globally
+  - `next.config.ts` — Turbopack `resolveAlias` stubs `@solana/web3.js` (pre-existing missing dep from `@clerk/ui`)
+
+- Liveblocks Setup (Feature 10):
+  - `@liveblocks/node` installed
+  - `liveblocks.config.ts` — `Presence` (cursor `{x,y}|null`, `isThinking`) and `UserMeta` (id, info: name/avatar/color) fully typed
+  - `lib/liveblocks.ts` — lazy cached `Liveblocks` node client (`getLiveblocks()`); `userIdToColor()` maps user ID to a deterministic color from a 9-color palette
+  - `app/api/liveblocks-auth/route.ts` — `POST`: requires Clerk auth, verifies project access via `getProjectWithAccess`, calls `getOrCreateRoom`, issues `prepareSession` token with `FULL_ACCESS` and user metadata (name, avatar, color)
+
+- Shape Panel (Feature 12):
+  - `components/editor/canvas-node.tsx` — `CanvasNodeRenderer`: simple bordered rectangle with centered label, 4 handles (top/bottom/left/right); text color resolved from `NODE_COLORS` lookup on `data.color`
+  - `components/editor/shape-panel.tsx` — floating pill toolbar at bottom-center with draggable buttons for all 6 shapes; drag payload (`application/ghost-shape`) carries `{ shape, width, height }`; sensible default sizes (rectangle 160×80, diamond 120×120, circle 100×100, pill 160×70, cylinder 100×120, hexagon 120×104)
+  - `components/editor/canvas-wrapper.tsx` — `CanvasFlow` now wraps `CanvasFlowInner` in `ReactFlowProvider`; `CanvasFlowInner` uses `useReactFlow<CanvasNode, CanvasEdge>()` for `screenToFlowPosition` (coordinate conversion) and `addNodes` (triggers `onNodesChange` which Liveblocks syncs to storage — avoids raw `LiveObject` wrapping); `nodeTypes = { canvasNode: CanvasNodeRenderer }`; `onDrop`/`onDragOver` handlers on wrapper div; node IDs generated as `${shape}-${Date.now()}-${counter}`; dropped nodes use empty label and default color (`NODE_COLORS[0].fill`)
 
 ## In Progress
 
@@ -51,7 +83,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 07 (TBD from feature-specs)
+- Feature 11 (TBD from feature-specs)
 
 ## Open Questions
 

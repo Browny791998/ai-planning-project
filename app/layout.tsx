@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ui } from "@clerk/ui";
 import { dark } from "@clerk/ui/themes";
 import "./globals.css";
+import "@xyflow/react/dist/style.css";
+import "@liveblocks/react-flow/styles.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
